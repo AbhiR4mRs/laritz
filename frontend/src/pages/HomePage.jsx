@@ -2,93 +2,176 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { fetchHomeData } from '../services/api'
 import ProductCard from '../components/ProductCard'
-import CartBar from '../components/CartBar'
+import { useCart } from '../context/CartContext'
+
+const initialState = {
+  categories: [],
+  featured_products: [],
+  new_arrivals: [],
+  banners: [],
+  settings: null,
+}
 
 export default function HomePage() {
-  const [data, setData] = useState({
-    categories: [],
-    featured_products: [],
-    new_arrivals: [],
-    banners: [],
-    settings: null,
-  })
-  const [cart, setCart] = useState([])
-  const [cartOpen, setCartOpen] = useState(false)
+  const [data, setData] = useState(initialState)
+  const [status, setStatus] = useState('loading')
   const navigate = useNavigate()
+  const { addItem } = useCart()
 
   useEffect(() => {
-    fetchHomeData().then(setData).catch(() => {})
+    let ignore = false
+
+    async function loadHomeData() {
+      setStatus('loading')
+
+      try {
+        const response = await fetchHomeData()
+        if (!ignore) {
+          setData({ ...initialState, ...response })
+          setStatus('ready')
+        }
+      } catch {
+        if (!ignore) {
+          setStatus('error')
+        }
+      }
+    }
+
+    loadHomeData()
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
-  const addToCart = (product) => {
-    const cartItem = {
-      ...product,
-      cartId: `${product.id}-${Date.now()}`,
-      quantity: 1,
-    }
-    setCart((prev) => [...prev, cartItem])
-    setCartOpen(true)
+  const handleAddToCart = (product) => {
+    addItem(product)
   }
 
-  const removeFromCart = (cartId) => {
-    setCart((prev) => prev.filter((item) => item.cartId !== cartId))
+  const handleBuyNow = (product) => {
+    addItem(product, 1, { openDrawer: false })
+    navigate('/checkout')
   }
 
-  const updateQuantity = (cartId, delta) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.cartId === cartId
-            ? { ...item, quantity: Math.max(1, (item.quantity || 1) + delta) }
-            : item
-        )
+  const hero = data.banners?.[0]
+  const brandName = data.settings?.brand_name || 'La Ritz'
+  const storyTitle = data.settings?.story_title || 'A handcrafted story'
+  const storyText =
+    data.settings?.story_text ||
+    'La Ritz brings together handcrafted softness, elevated detail, and boutique storytelling for pieces that feel personal and premium.'
+  const announcement =
+    data.settings?.announcement ||
+    'Soft handmade pieces, ready for gifting and everyday rituals.'
+  const instagramDmUrl = data.settings?.instagram_dm_url || 'https://ig.me/m/_needle_craft'
+  const categoryPills = data.categories.slice(0, 4)
+
+  if (status === 'loading') {
+    return (
+      <section className="section page-stack">
+        <div className="status-box">
+          <p className="eyebrow">Storefront</p>
+          <h1 className="page-title">Loading the latest handmade collection</h1>
+        </div>
+      </section>
     )
   }
 
-  const total = cart.reduce(
-    (sum, item) => sum + Number(item.price) * (item.quantity || 1),
-    0
-  )
-
-  const hero = data.banners?.[0]
+  if (status === 'error') {
+    return (
+      <section className="section page-stack">
+        <div className="status-box">
+          <p className="eyebrow">Storefront</p>
+          <h1 className="page-title">The collection could not be loaded</h1>
+          <p>Start the Django API and the storefront will be ready to browse.</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <>
-      <section className="hero">
+      <section className="hero section">
         <div className="hero-media">
           {hero?.image ? (
             <img src={hero.image} alt={hero.title || 'La Ritz hero'} />
           ) : (
-            <div className="category-fallback" />
+            <div className="hero-fallback">
+              <p className="eyebrow">Handcrafted highlight</p>
+              <h2>Made in small batches, styled for warm gifting and everyday softness.</h2>
+            </div>
           )}
 
-          <div className="hero-badge-stack">
-            <span>Handcrafted</span>
-            <span>Limited pieces</span>
-            <span>DM ordering</span>
-          </div>
+          {/* <div className="hero-overlay-card">
+            <p className="eyebrow">This week&apos;s focus</p>
+            <h3>{hero?.title || 'Boutique handmade edits'}</h3>
+            <p>{hero?.subtitle || announcement}</p>
+          </div> */}
         </div>
 
         <div className="hero-copy">
-          <p className="eyebrow">La Ritz atelier</p>
-          <h1>Soft craft, rich detail, timeless charm</h1>
-          <p>
-            A premium handcrafted storefront with warm editorial styling,
-            boutique collections, and direct ordering through Instagram DM.
-          </p>
+          <p className="eyebrow">{brandName} atelier</p>
+          <h1>{hero?.title || 'A proper handmade shop experience, start to finish'}</h1>
+          <p>{hero?.subtitle || announcement}</p>
 
           <div className="hero-actions">
-            <Link to="/shop" className="hero-btn">Shop collection</Link>
-            <a href="#categories" className="hero-link-btn">Explore categories</a>
+            <Link to="/shop" className="primary-button">
+              Shop collection
+            </Link>
+            <Link to="/checkout" className="secondary-button">
+              See checkout flow
+            </Link>
+          </div>
+
+          <div className="hero-highlights">
+            <div className="highlight-card">
+              <strong>Curated bag</strong>
+              <span>Persistent cart across pages</span>
+            </div>
+            <div className="highlight-card">
+              <strong>Boutique checkout</strong>
+              <span>Customer details and order summary before DM handoff</span>
+            </div>
+            <div className="highlight-card">
+              <strong>Made for gifting</strong>
+              <span>Notes for packaging, delivery timing, and custom requests</span>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="quick-strip">
-        <button className="quick-pill" onClick={() => navigate('/shop')}>New arrivals</button>
-        <button className="quick-pill" onClick={() => navigate('/shop?category=pouches')}>Pouches</button>
-        <button className="quick-pill" onClick={() => navigate('/shop?category=baby-frocks')}>Baby frocks</button>
-        <button className="quick-pill" onClick={() => navigate('/shop?category=crop-tops')}>Crop tops</button>
+        <button className="quick-pill" onClick={() => navigate('/shop')}>
+          Shop all
+        </button>
+        {categoryPills.map((category) => (
+          <button
+            className="quick-pill"
+            key={category.id}
+            onClick={() => navigate(`/shop?category=${category.slug}`)}
+          >
+            {category.name}
+          </button>
+        ))}
+      </section>
+
+      <section className="section">
+        <div className="trust-band">
+          <article className="trust-card">
+            <p className="eyebrow">01</p>
+            <h3>Handcrafted, not mass-produced</h3>
+            <p>Each piece is presented like a boutique find, with warmth and detail in the storytelling.</p>
+          </article>
+          <article className="trust-card">
+            <p className="eyebrow">02</p>
+            <h3>Bag and checkout flow</h3>
+            <p>Customers can add, review, and prepare their full order before moving into the DM handoff.</p>
+          </article>
+          <article className="trust-card">
+            <p className="eyebrow">03</p>
+            <h3>Direct maker conversation</h3>
+            <p>Instagram checkout keeps the buying journey personal for sizing, gifts, and custom requests.</p>
+          </article>
+        </div>
       </section>
 
       <section className="section" id="categories">
@@ -97,7 +180,7 @@ export default function HomePage() {
           <Link to="/shop">View all collections</Link>
         </div>
 
-        <div className="category-grid">
+        <div className="collection-grid">
           {data.categories.map((category) => (
             <Link
               to={`/shop?category=${category.slug}`}
@@ -108,7 +191,7 @@ export default function HomePage() {
                 {category.image ? (
                   <img src={category.image} alt={category.name} loading="lazy" />
                 ) : (
-                  <div className="category-fallback" />
+                  <div className="image-fallback">Collection</div>
                 )}
               </div>
 
@@ -117,7 +200,7 @@ export default function HomePage() {
                   <p className="eyebrow">Collection</p>
                   <h3>{category.name}</h3>
                 </div>
-                <span>Enter →</span>
+                <span>Shop collection</span>
               </div>
             </Link>
           ))}
@@ -132,7 +215,12 @@ export default function HomePage() {
 
         <div className="product-grid">
           {data.featured_products.map((product) => (
-            <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
+            />
           ))}
         </div>
       </section>
@@ -145,44 +233,74 @@ export default function HomePage() {
 
         <div className="product-grid">
           {data.new_arrivals.map((product) => (
-            <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
+            />
           ))}
         </div>
       </section>
 
-      <section className="story section" id="story">
-        <div className="story-panel media-panel"></div>
+      <section className="section" id="story">
+        <div className="editorial-panel">
+          <div className="editorial-copy">
+            <p className="eyebrow">Our story</p>
+            <h2>{storyTitle}</h2>
+            <p>{storyText}</p>
 
-        <div className="story-panel text-panel">
-          <p className="eyebrow">Our story</p>
-          <h2>Handmade with intention, styled with warmth</h2>
-          <p>
-            {data.settings?.story_text ||
-              'La Ritz brings together handcrafted softness, elevated detail, and boutique storytelling for pieces that feel personal and premium.'}
-          </p>
+            <div className="hero-actions">
+              <Link to="/shop" className="primary-button">
+                Shop now
+              </Link>
+              <Link to="/cart" className="secondary-button">
+                Review your bag
+              </Link>
+            </div>
+          </div>
 
-          <div className="story-actions">
-            <Link to="/shop" className="hero-btn">Shop now</Link>
+          <div className="editorial-aside">
+            <div className="support-card">
+              <h3>Bag to checkout</h3>
+              <p>Customers can now move from browsing to a structured order review without losing their selections.</p>
+            </div>
+            <div className="support-card">
+              <h3>Made for handmade orders</h3>
+              <p>The checkout flow still respects the brand&apos;s direct-message fulfilment model.</p>
+            </div>
+            <div className="support-card">
+              <h3>Need help deciding?</h3>
+              <a href={instagramDmUrl} target="_blank" rel="noopener noreferrer">
+                Open Instagram DM
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="closing-banner">
+          <div>
+            <p className="eyebrow">Ready to order</p>
+            <h2>Build the bag first, then check out with confidence</h2>
+          </div>
+
+          <div className="hero-actions">
+            <Link to="/shop" className="primary-button">
+              Browse the shop
+            </Link>
             <a
-              href="https://ig.me/m/_needle_craft"
+              href={instagramDmUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hero-link-btn"
+              className="secondary-button"
             >
               Open Instagram DM
             </a>
           </div>
         </div>
       </section>
-
-      <CartBar
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cartItems={cart}
-        onRemove={removeFromCart}
-        onUpdateQuantity={updateQuantity}
-        total={total.toFixed(0)}
-      />
     </>
   )
 }

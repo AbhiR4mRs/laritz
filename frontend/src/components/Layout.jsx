@@ -1,37 +1,117 @@
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import CartDrawer from './CartDrawer'
+import { useCart } from '../context/CartContext'
 
 export default function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+  const { itemCount, openCart } = useCart()
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
 
   return (
     <div className="site-shell">
-      <div className="top-strip">Free shipping on select handcrafted pieces · Limited pieces · Made with love</div>
+      <div className="top-strip">
+        <span>Handcrafted pieces in small batches</span>
+        <span>Gift-ready ordering support</span>
+        <span>Instagram concierge checkout</span>
+      </div>
+
       <header className="header">
-        <Link to="/" className="brand">La Ritz</Link>
-        <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">☰</button>
+        <Link to="/" className="brand">
+          <span className="brand-mark">La Ritz</span>
+          <span className="brand-sub">Handcrafted boutique store</span>
+        </Link>
+
+        <button
+          type="button"
+          className="menu-btn"
+          onClick={() => setMenuOpen((currentValue) => !currentValue)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? 'Close' : 'Menu'}
+        </button>
+
         <nav className={`nav ${menuOpen ? 'open' : ''}`}>
-          <Link to="/">Home</Link>
-          <Link to="/shop">Shop</Link>
-          <a href="#story">About Us</a>
-          <a href="https://www.instagram.com/_needle_craft?igsh=MW5vamZha2d3eGVlMQ==" target="_blank" rel="noopener noreferrer">Contact</a>
+          <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+            Home
+          </NavLink>
+          <NavLink
+            to="/shop"
+            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          >
+            Shop
+          </NavLink>
+          <NavLink
+            to="/cart"
+            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          >
+            Bag
+          </NavLink>
+          <NavLink
+            to="/checkout"
+            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          >
+            Checkout
+          </NavLink>
+          <a
+            className="nav-link"
+            href="https://www.instagram.com/_needle_craft"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Contact
+          </a>
         </nav>
+
+        <div className="header-actions">
+          <Link to="/checkout" className="header-secondary-btn">
+            Checkout
+          </Link>
+          <button type="button" className="cart-trigger" onClick={openCart}>
+            Bag
+            <span className="cart-count">{itemCount}</span>
+          </button>
+        </div>
       </header>
+
       <main>{children}</main>
+
       <footer className="footer">
-        <div>
-          <div className="brand brand-foot">La Ritz</div>
-          <p>Small batches. Premium handcrafted charm.</p>
+        <div className="footer-block">
+          <div className="brand-mark brand-foot">La Ritz</div>
+          <p>
+            A warm, editorial storefront for handmade pieces, thoughtful gifts,
+            and small-batch everyday craft.
+          </p>
         </div>
-        <div>
+
+        <div className="footer-block">
+          <h4>Shop flow</h4>
+          <p>Add to bag, review the order, then finish checkout over Instagram DM.</p>
+        </div>
+
+        <div className="footer-block">
           <h4>Customer care</h4>
-          <p>DM us on Instagram for orders and updates.</p>
+          <p>Use checkout notes for gift wrap, personalisation, and delivery questions.</p>
         </div>
-        <div>
+
+        <div className="footer-block">
           <h4>Instagram</h4>
-          <a href="https://ig.me/m/_needle_craft" target="_blank" rel="noopener noreferrer">Open DM</a>
+          <a
+            href="https://ig.me/m/_needle_craft"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open order DM
+          </a>
         </div>
       </footer>
+
+      <CartDrawer />
     </div>
   )
 }
