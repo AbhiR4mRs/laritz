@@ -31,6 +31,7 @@ export default function Layout({ children }) {
           className="menu-btn"
           onClick={() => setMenuOpen((currentValue) => !currentValue)}
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           {menuOpen ? 'Close' : 'Menu'}
         </button>
@@ -71,7 +72,12 @@ export default function Layout({ children }) {
           <Link to="/checkout" className="header-secondary-btn">
             Checkout
           </Link>
-          <button type="button" className="cart-trigger" onClick={openCart}>
+          <button
+            type="button"
+            className="cart-trigger"
+            onClick={openCart}
+            aria-label={`Open shopping bag with ${itemCount} item${itemCount === 1 ? '' : 's'}`}
+          >
             Bag
             <span className="cart-count">{itemCount}</span>
           </button>

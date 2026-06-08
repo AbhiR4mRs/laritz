@@ -97,7 +97,8 @@ export default function HomePage() {
           ) : (
             <div className="hero-fallback">
               <p className="eyebrow">Handcrafted highlight</p>
-              <h2>Made in small batches, styled for warm gifting and everyday softness.</h2>
+              <h2>{hero?.title || 'Made in small batches, styled for warm gifting and everyday softness.'}</h2>
+              <p>{hero?.subtitle || announcement}</p>
             </div>
           )}
 

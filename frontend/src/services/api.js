@@ -1,3 +1,10 @@
+import {
+  fallbackCategories,
+  fallbackHomeData,
+  fallbackProductList,
+  findFallbackProduct,
+} from './fallbackData'
+
 const API_BASE = (
   import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
 ).replace(/\/$/, '')
@@ -14,32 +21,54 @@ async function requestJson(path) {
 }
 
 export async function fetchHomeData() {
-  return requestJson('/home/')
+  try {
+    return await requestJson('/home/')
+  } catch {
+    return fallbackHomeData()
+  }
 }
 
 export async function fetchProducts(params = {}) {
-  if (typeof params === 'string') {
-    return requestJson(`/products/${params ? `?${params}` : ''}`)
-  }
-
-  const searchParams = new URLSearchParams()
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value) {
-      searchParams.set(key, value)
+  try {
+    if (typeof params === 'string') {
+      return await requestJson(`/products/${params ? `?${params}` : ''}`)
     }
-  })
 
-  const query = searchParams.toString()
-  return requestJson(`/products/${query ? `?${query}` : ''}`)
+    const searchParams = new URLSearchParams()
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        searchParams.set(key, value)
+      }
+    })
+
+    const query = searchParams.toString()
+    return await requestJson(`/products/${query ? `?${query}` : ''}`)
+  } catch {
+    return fallbackProductList(params)
+  }
 }
 
 export async function fetchProduct(slug) {
-  return requestJson(`/products/${slug}/`)
+  try {
+    return await requestJson(`/products/${slug}/`)
+  } catch (error) {
+    const fallbackProduct = findFallbackProduct(slug)
+
+    if (fallbackProduct) {
+      return fallbackProduct
+    }
+
+    throw error
+  }
 }
 
 export async function fetchCategories() {
-  return requestJson('/categories/')
+  try {
+    return await requestJson('/categories/')
+  } catch {
+    return fallbackCategories
+  }
 }
 
 export function formatCurrency(amount) {
