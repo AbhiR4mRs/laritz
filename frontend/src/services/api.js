@@ -77,7 +77,7 @@ export function formatCurrency(amount) {
   }).format(Number(amount) || 0)}`
 }
 
-function buildInstagramOrderMessage({ items = [], customer = {}, note = '' }) {
+export function getInstagramOrderMessage({ items = [], customer = {}, note = '' }) {
   const lines = ['Hi La Ritz, I would like to place an order from the website.', '']
 
   if (items.length) {
@@ -130,6 +130,6 @@ export function getInstagramDmLink(order = {}) {
     return INSTAGRAM_DM_URL
   }
 
-  const text = encodeURIComponent(buildInstagramOrderMessage(order))
+  const text = encodeURIComponent(getInstagramOrderMessage(order))
   return `${INSTAGRAM_DM_URL}?text=${text}`
 }

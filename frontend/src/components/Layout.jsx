@@ -15,15 +15,15 @@ export default function Layout({ children }) {
   return (
     <div className="site-shell">
       <div className="top-strip">
-        <span>Handcrafted pieces in small batches</span>
-        <span>Gift-ready ordering support</span>
-        <span>Instagram concierge checkout</span>
+        <span>Small drops, made slowly</span>
+        <span>Gift notes and custom details</span>
+        <span>DM checkout with a human touch</span>
       </div>
 
       <header className="header">
         <Link to="/" className="brand">
           <span className="brand-mark">La Ritz</span>
-          <span className="brand-sub">Handcrafted boutique store</span>
+          <span className="brand-sub">soft craft studio</span>
         </Link>
 
         <button
@@ -97,12 +97,12 @@ export default function Layout({ children }) {
 
         <div className="footer-block">
           <h4>Shop flow</h4>
-          <p>Add to bag, review the order, then finish checkout over Instagram DM.</p>
+          <p>Pick your pieces, collect the details, then confirm everything over Instagram DM.</p>
         </div>
 
         <div className="footer-block">
           <h4>Customer care</h4>
-          <p>Use checkout notes for gift wrap, personalisation, and delivery questions.</p>
+          <p>Leave notes for gift wrap, personalization, sizing, and delivery questions.</p>
         </div>
 
         <div className="footer-block">

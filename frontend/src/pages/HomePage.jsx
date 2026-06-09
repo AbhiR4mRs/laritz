@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { fetchHomeData } from '../services/api'
 import ProductCard from '../components/ProductCard'
 import { useCart } from '../context/CartContext'
+import heroFallbackImg from '../assets/hero_boutique.png'
 
 const initialState = {
   categories: [],
@@ -58,12 +59,17 @@ export default function HomePage() {
   const storyTitle = data.settings?.story_title || 'A handcrafted story'
   const storyText =
     data.settings?.story_text ||
-    'La Ritz brings together handcrafted softness, elevated detail, and boutique storytelling for pieces that feel personal and premium.'
+    'La Ritz brings together handcrafted softness, playful color, and boutique storytelling for pieces that feel personal from the first scroll.'
   const announcement =
     data.settings?.announcement ||
     'Soft handmade pieces, ready for gifting and everyday rituals.'
   const instagramDmUrl = data.settings?.instagram_dm_url || 'https://ig.me/m/_needle_craft'
-  const categoryPills = data.categories.slice(0, 4)
+  const categoryPills = data.categories.slice(0, 5)
+  const heroTitle =
+    hero?.title || 'Soft handmade pieces with a bright studio soul'
+  const heroSubtitle =
+    hero?.subtitle ||
+    'Browse small-batch drops, collect favorites in your bag, and confirm the human details directly with La Ritz.'
 
   if (status === 'loading') {
     return (
@@ -89,99 +95,140 @@ export default function HomePage() {
   }
 
   return (
-    <>
-      <section className="hero section">
-        <div className="hero-media">
-          {hero?.image ? (
-            <img src={hero.image} alt={hero.title || 'La Ritz hero'} />
-          ) : (
-            <div className="hero-fallback">
-              <p className="eyebrow">Handcrafted highlight</p>
-              <h2>{hero?.title || 'Made in small batches, styled for warm gifting and everyday softness.'}</h2>
-              <p>{hero?.subtitle || announcement}</p>
-            </div>
-          )}
-
-          {/* <div className="hero-overlay-card">
-            <p className="eyebrow">This week&apos;s focus</p>
-            <h3>{hero?.title || 'Boutique handmade edits'}</h3>
-            <p>{hero?.subtitle || announcement}</p>
-          </div> */}
-        </div>
-
-        <div className="hero-copy">
-          <p className="eyebrow">{brandName} atelier</p>
-          <h1>{hero?.title || 'A proper handmade shop experience, start to finish'}</h1>
-          <p>{hero?.subtitle || announcement}</p>
+    <div className="home-page">
+      <section className="home-hero section">
+        <div className="home-hero-copy">
+          <p className="eyebrow">{brandName} studio</p>
+          <span className="home-badge">Tiny batches · big handmade energy</span>
+          <h1>{heroTitle}</h1>
+          <p className="home-hero-lede">{heroSubtitle}</p>
 
           <div className="hero-actions">
             <Link to="/shop" className="primary-button">
-              Shop collection
+              Explore collection
             </Link>
-            <Link to="/checkout" className="secondary-button">
-              See checkout flow
-            </Link>
+            <a
+              href={instagramDmUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="secondary-button"
+            >
+              Message the studio
+            </a>
           </div>
 
-          <div className="hero-highlights">
-            <div className="highlight-card">
-              <strong>Curated bag</strong>
-              <span>Persistent cart across pages</span>
+          {/* <div className="home-metrics" aria-label="Store highlights">
+            <div>
+              <strong>{data.categories.length || 4}</strong>
+              <span>Collections</span>
             </div>
-            <div className="highlight-card">
-              <strong>Boutique checkout</strong>
-              <span>Customer details and order summary before DM handoff</span>
+            <div>
+              <strong>{data.featured_products.length || 6}</strong>
+              <span>Featured edits</span>
             </div>
-            <div className="highlight-card">
-              <strong>Made for gifting</strong>
-              <span>Notes for packaging, delivery timing, and custom requests</span>
+            <div>
+              <strong>DM</strong>
+              <span>Concierge checkout</span>
             </div>
+          </div> */}
+        </div>
+
+        <div className="home-showcase" aria-label="La Ritz collection preview">
+          <div className="showcase-main">
+            <img src={hero?.image || heroFallbackImg} alt={hero?.title || 'La Ritz handmade collection'} />
+          </div>
+
+          <div className="showcase-note">
+            <span>New season</span>
+            <strong>{data.new_arrivals.length || 6} fresh pieces</strong>
+          </div>
+
+          <div className="showcase-card">
+            <p className="eyebrow">Order flow</p>
+            <h3>Browse, build a bag, confirm in DM.</h3>
           </div>
         </div>
       </section>
 
-      <section className="quick-strip">
-        <button className="quick-pill" onClick={() => navigate('/shop')}>
-          Shop all
-        </button>
-        {categoryPills.map((category) => (
-          <button
-            className="quick-pill"
-            key={category.id}
-            onClick={() => navigate(`/shop?category=${category.slug}`)}
-          >
-            {category.name}
+      <section className="home-category-rail section" aria-label="Popular categories">
+        <div>
+          <p className="eyebrow">Shop by mood</p>
+          <h2>Choose a collection</h2>
+        </div>
+
+        <div className="home-category-pills">
+          <button type="button" className="quick-pill" onClick={() => navigate('/shop')}>
+            All products
           </button>
-        ))}
+          {categoryPills.map((category) => (
+            <button
+              type="button"
+              className="quick-pill"
+              key={category.id}
+              onClick={() => navigate(`/shop?category=${category.slug}`)}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
       </section>
 
-      <section className="section">
-        <div className="trust-band">
-          <article className="trust-card">
-            <p className="eyebrow">01</p>
-            <h3>Handcrafted, not mass-produced</h3>
-            <p>Each piece is presented like a boutique find, with warmth and detail in the storytelling.</p>
+      <section className="home-promise section">
+        <div className="home-section-intro">
+          <p className="eyebrow">Why customers stay</p>
+          <h2>A precise shopping flow, wrapped in handmade warmth.</h2>
+        </div>
+
+        <div className="home-promise-grid">
+          <article className="home-promise-card">
+            <span>01</span>
+            <h3>Studio-style presentation</h3>
+            <p>Products sit in colorful, tactile cards with clear categories and a warm browsing rhythm.</p>
           </article>
-          <article className="trust-card">
-            <p className="eyebrow">02</p>
-            <h3>Bag and checkout flow</h3>
-            <p>Customers can add, review, and prepare their full order before moving into the DM handoff.</p>
+          <article className="home-promise-card">
+            <span>02</span>
+            <h3>Ready-to-review bag</h3>
+            <p>Customers can collect pieces across pages and review every handmade detail before ordering.</p>
           </article>
-          <article className="trust-card">
-            <p className="eyebrow">03</p>
-            <h3>Direct maker conversation</h3>
-            <p>Instagram checkout keeps the buying journey personal for sizing, gifts, and custom requests.</p>
+          <article className="home-promise-card">
+            <span>03</span>
+            <h3>Personal checkout</h3>
+            <p>Instagram handoff keeps custom requests, gifting notes, availability, and delivery details human.</p>
           </article>
         </div>
       </section>
 
-      <section className="section" id="categories">
-        <div className="section-head">
-          <h2>Browse by category</h2>
-          <Link to="/shop">View all collections</Link>
+      <section className="section home-featured">
+        <div className="home-section-head">
+          <div>
+            <p className="eyebrow">Featured edit</p>
+            <h2>Freshly picked pieces with texture and color.</h2>
+          </div>
+          <Link to="/shop">View all products</Link>
         </div>
 
-        <div className="collection-grid">
+        <div className="product-grid home-product-grid">
+          {data.featured_products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="section home-collections" id="categories">
+        <div className="home-section-head">
+          <div>
+            <p className="eyebrow">Collections</p>
+            <h2>Organized by mood, texture, and tiny joys.</h2>
+          </div>
+          <Link to="/shop">Browse shop</Link>
+        </div>
+
+        <div className="collection-grid home-collection-grid">
           {data.categories.map((category) => (
             <Link
               to={`/shop?category=${category.slug}`}
@@ -201,38 +248,57 @@ export default function HomePage() {
                   <p className="eyebrow">Collection</p>
                   <h3>{category.name}</h3>
                 </div>
-                <span>Shop collection</span>
+                <span>Shop now</span>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      <section className="section">
-        <div className="section-head">
-          <h2>Featured pieces</h2>
-          <Link to="/shop">Shop all</Link>
+      <section className="section home-story" id="story">
+        <div className="home-story-copy">
+          <p className="eyebrow">Brand story</p>
+          <h2>{storyTitle}</h2>
+          <p>{storyText}</p>
+          <div className="hero-actions">
+            <Link to="/shop" className="primary-button">
+              Shop the edit
+            </Link>
+            <Link to="/cart" className="secondary-button">
+              Review your bag
+            </Link>
+          </div>
         </div>
 
-        <div className="product-grid">
-          {data.featured_products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={handleAddToCart}
-              onBuyNow={handleBuyNow}
-            />
-          ))}
+        <div className="home-process-list">
+          <article>
+            <span>Step 1</span>
+            <h3>Select pieces</h3>
+            <p>Browse categories, add favorites, and keep the cart ready across pages.</p>
+          </article>
+          <article>
+            <span>Step 2</span>
+            <h3>Add details</h3>
+            <p>Use checkout notes for gifting, custom requests, delivery timing, and sizing.</p>
+          </article>
+          <article>
+            <span>Step 3</span>
+            <h3>Confirm personally</h3>
+            <p>Send the prepared Instagram message and finalize availability directly.</p>
+          </article>
         </div>
       </section>
 
-      <section className="section">
-        <div className="section-head">
-          <h2>New arrivals</h2>
+      <section className="section home-arrivals">
+        <div className="home-section-head">
+          <div>
+            <p className="eyebrow">Latest drop</p>
+            <h2>Fresh additions for gifting and everyday use.</h2>
+          </div>
           <Link to="/shop">Discover more</Link>
         </div>
 
-        <div className="product-grid">
+        <div className="product-grid home-product-grid">
           {data.new_arrivals.map((product) => (
             <ProductCard
               key={product.id}
@@ -244,52 +310,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section" id="story">
-        <div className="editorial-panel">
-          <div className="editorial-copy">
-            <p className="eyebrow">Our story</p>
-            <h2>{storyTitle}</h2>
-            <p>{storyText}</p>
-
-            <div className="hero-actions">
-              <Link to="/shop" className="primary-button">
-                Shop now
-              </Link>
-              <Link to="/cart" className="secondary-button">
-                Review your bag
-              </Link>
-            </div>
-          </div>
-
-          <div className="editorial-aside">
-            <div className="support-card">
-              <h3>Bag to checkout</h3>
-              <p>Customers can now move from browsing to a structured order review without losing their selections.</p>
-            </div>
-            <div className="support-card">
-              <h3>Made for handmade orders</h3>
-              <p>The checkout flow still respects the brand&apos;s direct-message fulfilment model.</p>
-            </div>
-            <div className="support-card">
-              <h3>Need help deciding?</h3>
-              <a href={instagramDmUrl} target="_blank" rel="noopener noreferrer">
-                Open Instagram DM
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section">
-        <div className="closing-banner">
-          <div>
-            <p className="eyebrow">Ready to order</p>
-            <h2>Build the bag first, then check out with confidence</h2>
-          </div>
-
+        <div className="home-cta">
+          <p className="eyebrow">Ready to order</p>
+          <h2>Build a beautiful bag first. Confirm the handmade details later.</h2>
           <div className="hero-actions">
             <Link to="/shop" className="primary-button">
-              Browse the shop
+              Start shopping
             </Link>
             <a
               href={instagramDmUrl}
@@ -302,6 +329,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   )
 }

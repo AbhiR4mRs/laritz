@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { formatCurrency, getInstagramDmLink } from '../services/api'
+import { formatCurrency, getInstagramDmLink, getInstagramOrderMessage } from '../services/api'
 
 const initialForm = {
   fullName: '',
@@ -13,11 +13,37 @@ const initialForm = {
   note: '',
 }
 
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return true
+  }
+
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.top = '-1000px'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.select()
+
+  const copied = document.execCommand('copy')
+  textarea.remove()
+
+  if (!copied) {
+    throw new Error('Clipboard copy failed')
+  }
+
+  return true
+}
+
 export default function CheckoutPage() {
   const { items, itemCount, subtotal, clearCart } = useCart()
   const [form, setForm] = useState(initialForm)
   const [formError, setFormError] = useState('')
   const [checkoutStarted, setCheckoutStarted] = useState(false)
+  const [copyStatus, setCopyStatus] = useState('')
 
   if (!items.length) {
     return (
@@ -27,7 +53,7 @@ export default function CheckoutPage() {
           <h1 className="page-title">Add something beautiful before checkout</h1>
           <p>
             Your checkout flow is ready. Add products to your bag and we will
-            prefill the Instagram order request for you.
+            prepare the Instagram order request for you.
           </p>
           <Link to="/shop" className="primary-button">
             Browse products
@@ -37,11 +63,13 @@ export default function CheckoutPage() {
     )
   }
 
-  const checkoutLink = getInstagramDmLink({
+  const instagramOrder = {
     items,
     customer: form,
     note: form.note,
-  })
+  }
+  const checkoutLink = getInstagramDmLink(instagramOrder)
+  const orderMessage = getInstagramOrderMessage(instagramOrder)
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -51,7 +79,20 @@ export default function CheckoutPage() {
     }))
   }
 
-  const handleSubmit = (event) => {
+  const handleCopyOrder = async () => {
+    try {
+      await copyTextToClipboard(orderMessage)
+      setCopyStatus('Order details copied. Paste them into Instagram if the message box is blank.')
+      return true
+    } catch {
+      setCopyStatus(
+        'Instagram opened, but this browser blocked clipboard copy. Tap "Copy order again" and paste it in DM.'
+      )
+      return false
+    }
+  }
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     if (!form.fullName.trim() || !form.city.trim()) {
@@ -65,8 +106,9 @@ export default function CheckoutPage() {
     }
 
     setFormError('')
-    setCheckoutStarted(true)
+    await handleCopyOrder()
     window.open(checkoutLink, '_blank', 'noopener,noreferrer')
+    setCheckoutStarted(true)
   }
 
   return (
@@ -178,7 +220,7 @@ export default function CheckoutPage() {
 
           <div className="inline-actions">
             <button type="submit" className="primary-button">
-              Send order to Instagram
+              Copy order & open Instagram
             </button>
             <Link to="/cart" className="secondary-button">
               Back to bag
@@ -186,17 +228,20 @@ export default function CheckoutPage() {
           </div>
 
           <p className="checkout-note">
-            After the Instagram DM opens, send the prefilled message and La
-            Ritz can confirm availability, shipping, and payment details with
-            you directly.
+            Instagram may not auto-fill DM text on every device, so checkout
+            copies the full order first. Paste it into the La Ritz DM if the
+            message box opens blank.
           </p>
 
           {checkoutStarted ? (
             <div className="confirmation-panel">
               <p>
-                Your order request has been prepared. Once you send it on
-                Instagram, you can clear the bag here.
+                {copyStatus ||
+                  'Your order request has been prepared. Paste it into Instagram, then send it to La Ritz.'}
               </p>
+              <button type="button" className="text-button" onClick={handleCopyOrder}>
+                Copy order again
+              </button>
               <button type="button" className="text-button" onClick={clearCart}>
                 Clear bag after sending
               </button>

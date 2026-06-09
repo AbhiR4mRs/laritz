@@ -134,10 +134,10 @@ export default function ShopPage() {
       <div className="section-head">
         <div>
           <p className="eyebrow">La Ritz collection</p>
-          <h1 className="page-title">A polished boutique shopping flow</h1>
+          <h1 className="page-title">A colorful handmade shelf, neatly sorted</h1>
           <p className="section-copy">
-            Search, filter, sort, add to bag, and head into checkout without
-            leaving the storefront experience.
+            Search, filter, sort, add to bag, and keep the whole handmade
+            discovery flow feeling light, tactile, and quick.
           </p>
         </div>
       </div>
@@ -244,8 +244,8 @@ export default function ShopPage() {
           <p>Customers can mention gift wrap, custom requests, or delivery timing before they DM.</p>
         </article>
         <article className="support-card">
-          <h3>Proper bag experience</h3>
-          <p>The shared cart now persists across the home page, shop page, product page, and checkout.</p>
+          <h3>One tidy bag</h3>
+          <p>The shared cart follows customers across home, shop, product pages, and checkout.</p>
         </article>
       </div>
     </section>

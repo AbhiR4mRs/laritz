@@ -126,7 +126,7 @@ export default function ProductPage() {
           <p className="price price-large">{formatCurrency(product.price)}</p>
           <p className="product-detail-copy">
             {product.description ||
-              'Crafted to feel personal, soft, and elevated, with the kind of detail that suits a boutique storefront.'}
+              'Crafted to feel personal, soft, and expressive, with details that look and feel made by hand.'}
           </p>
 
           <div className="product-meta-grid">

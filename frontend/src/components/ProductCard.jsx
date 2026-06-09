@@ -34,11 +34,11 @@ export default function ProductCard({ product, onAddToCart, onBuyNow }) {
         </div>
 
         <div className="product-copy">
-          <p className="eyebrow">La Ritz edit</p>
+          <p className="eyebrow">Made-by-hand edit</p>
           <h3>{product.name}</h3>
           <p className="product-description">
             {product.description ||
-              'Soft textures, handcrafted detail, and boutique finishing in every piece.'}
+              'Soft texture, careful detail, and a little studio-made charm in every piece.'}
           </p>
 
           <div className="product-meta">
